@@ -9,6 +9,7 @@
 #include<avr/interrupt.h>
 #include "uart.h"
 
+int super_loop_flag = 0;
 
 int main(void)
 {
@@ -41,6 +42,6 @@ int main(void)
 ISR (TIMER0_COMPA_vect)  // timer0 overflow interrupt
 {
 	//event to be exicuted every 4ms here
-	printf("ISR count: %i\n", isrCout ++);
+	//printf("ISR count: %i\n", isrCout ++);
 }
 
