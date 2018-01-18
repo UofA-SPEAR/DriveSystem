@@ -5,7 +5,14 @@
  //* Author : spear
  //*/ 
 
+#ifndef F_CPU
 #define F_CPU 16000000UL
+#endif
+
+#ifndef BAUD
+#define BAUD 9600
+#endif
+
 #include <avr/io.h>
 
 #include <avr/interrupt.h> // notice that we have swapped libraries, from delay to interrupt

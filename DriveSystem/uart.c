@@ -1,20 +1,7 @@
-/* Code was taken from:
-* https://github.com/tuupola/avr_demo/blob/master/blog/simple_usart/uart.c
-*/
+#include "uart.h"
 
-#include <avr/io.h>
-#include <stdio.h>
-
-#ifndef F_CPU
-#define F_CPU 16000000UL
-#endif
-
-#ifndef BAUD
-#define BAUD 9600
-#endif
-#include <util/setbaud.h>
-
-/* http://www.cs.mun.ca/~rod/Winter2007/4723/notes/serial/serial.html */
+FILE uart_output = FDEV_SETUP_STREAM(uart_putchar, NULL, _FDEV_SETUP_WRITE);
+FILE uart_input = FDEV_SETUP_STREAM(NULL, uart_getchar, _FDEV_SETUP_READ);
 
 void uart_init() {
 	UBRR0H = UBRRH_VALUE;
@@ -26,8 +13,8 @@ void uart_init() {
 	UCSR0A &= ~(_BV(U2X0));
 	#endif
 
-	UCSR0C = _BV(UCSZ01) | _BV(UCSZ00); /* 8-bit data */
-	UCSR0B = _BV(RXEN0) | _BV(TXEN0) | _BV(RXCIE0);   /* Enable RX and TX and interuupt on recive*/
+	UCSR0C = _BV(UCSZ01) | _BV(UCSZ00);					/* 8-bit data */
+	UCSR0B = _BV(TXEN0) | _BV(RXEN0) | _BV(RXCIE0);		/* Enable Tx, Rx, and interrupt on receive*/
 	
 }
 
