@@ -18,7 +18,8 @@ volatile bool usart_rx_flag = false;
 void setup_pins();
 void setup_timer();
 
-int main (void) {
+int main (void) 
+{
 	// Initialize
 	setup_pins();
 	setup_timer();
