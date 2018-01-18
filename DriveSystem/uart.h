@@ -1,6 +1,8 @@
 #ifndef UART_H
 #define UART_H
 
+#include <stdio.h>
+
 #ifndef F_CPU
 #define F_CPU 16000000UL
 #endif
@@ -9,14 +11,11 @@
 #define BAUD 9600
 #endif
 
-#include <util/setbaud.h>
-#include <stdio.h>
-#include <avr/io.h>
-
 FILE uart_output;
 FILE uart_input;
 
 void uart_init();
+void uart_set_io_streams(FILE *input_stream, FILE *output_stream);
 void uart_putchar(char c, FILE *stream);
 char uart_getchar(FILE *stream);
 

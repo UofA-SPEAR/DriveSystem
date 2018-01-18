@@ -2,26 +2,20 @@
  //* DriveSystem.c
  //*
  //* Created: 2018-01-16 11:16:23 AM
- //* Author : spear
+ //* Author : Brad and Brian Ofrim
  //*/ 
+ 
+#include <avr/interrupt.h>
+#include <stdbool.h>
+#include "uart.h"
 
 #ifndef F_CPU
 #define F_CPU 16000000UL
 #endif
 
-#ifndef BAUD
-#define BAUD 9600
-#endif
-
-#include <avr/io.h>
-
-#include <avr/interrupt.h> // notice that we have swapped libraries, from delay to interrupt
-#include <util/delay.h>
-#include <stdbool.h>
-#include "uart.h"
-
 volatile bool flag = false;
 volatile char ReceivedByte;
+
 int main (void) {
 
 	//// set as output pins
@@ -29,9 +23,8 @@ int main (void) {
 	PORTB |= _BV(PORTB5);
 
 	//Initialize
-	stdout = &uart_output;
-	stdin =  &uart_input;
 	uart_init();
+	uart_set_io_streams(&stdin, &stdout);
 
 	TCCR1B |= (1 << WGM12); // configure timer1 for CTC mode
 
