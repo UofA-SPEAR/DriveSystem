@@ -18,13 +18,12 @@ void uart_init()
 
 	UCSR0C = _BV(UCSZ01) | _BV(UCSZ00);					/* 8-bit data */
 	UCSR0B = _BV(TXEN0) | _BV(RXEN0) | _BV(RXCIE0);		/* Enable Tx, Rx, and interrupt on receive*/
-	
 }
 
-void uart_set_io_streams(FILE* input_stream, FILE* output_stream)
+void uart_set_io_streams()
 {
-	*input_stream = uart_output;
-	*output_stream =  uart_input;
+	stdin = &uart_input;
+	stdout =  &uart_output;
 }
 
 void uart_putchar(char c, FILE *stream) 

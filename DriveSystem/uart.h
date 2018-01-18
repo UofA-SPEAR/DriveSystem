@@ -15,7 +15,7 @@ FILE uart_output;
 FILE uart_input;
 
 void uart_init();
-void uart_set_io_streams(FILE *input_stream, FILE *output_stream);
+void uart_set_io_streams();
 void uart_putchar(char c, FILE *stream);
 char uart_getchar(FILE *stream);
 
