@@ -13,50 +13,53 @@
 #define F_CPU 16000000UL
 #endif
 
-volatile bool flag = false;
-volatile char ReceivedByte;
+volatile bool usart_rx_flag = false;
+
+void setup_pins();
+void setup_timer();
 
 int main (void) {
-
-	//// set as output pins
-	DDRB |= _BV(DDB5);
-	PORTB |= _BV(PORTB5);
-
-	//Initialize
+	// Initialize
+	setup_pins();
+	setup_timer();
 	uart_init();
 	uart_set_io_streams(&stdin, &stdout);
-
-	TCCR1B |= (1 << WGM12); // configure timer1 for CTC mode
-
-	TIMSK1 |= (1 << OCIE1A); // enable the CTC interrupt b 
 	
+	// Enable global interrupts
+	sei();
 
-	sei(); // enable global interrupts
-
-	OCR1A   = 19531/10; // set the CTC compare value
-
-	TCCR1B |= ((1 << CS10) | (1 << CS12)); // start the timer at 20MHz/1024
-
-	while(1) { // main loop - do anything you like here!
-		while(flag == false);
-		flag = false;
+	// Super loop
+	while(1) 
+	{
+		while(usart_rx_flag == false);
+		usart_rx_flag = false;
 		PORTB ^= _BV(PORTB5); // toggle the LED
 	}
+}
 
+void setup_pins()
+{
+	DDRB |= _BV(DDB5);
+	PORTB |= _BV(PORTB5);
+}
+
+void setup_timer()
+{
+	TCCR1B |= _BV(WGM12); // configure timer1 for CTC mode
+	TIMSK1 |= _BV(OCIE1A); // enable the CTC interrupt b
+	TCCR1B |= _BV(CS10) | _BV(CS12); // start the timer at 20MHz/1024
+	OCR1A   = 19531/10; // set the CTC compare value
 }
 
 ISR(USART_RX_vect) {
-	ReceivedByte = UDR0; // Fetch the received byte value into the variable "ByteReceived"
-	UDR0 = ReceivedByte; // Echo back the received byte back to the computer
-	flag = true;
+	char receivedByte = UDR0; // Fetch the received byte value into the variable "ByteReceived"
+	UDR0 = receivedByte; // Echo back the received byte back to the computer
+	usart_rx_flag = true;
 }
 
 
 //ISR(TIMER1_COMPA_vect) { // this function is called every time the timer reaches the threshold we set
-//
-	//
 	//flag = true;
-//
 //}
 
 
