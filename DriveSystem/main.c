@@ -35,7 +35,6 @@ char input_command_str[BUF_SIZE];
 // TODO: refactor current_command
 struct polar_coordinate current_command;
 
-
 void setup_pins();
 void setup_timer();
 
@@ -50,8 +49,8 @@ int main (void)
 	setup_timer();
 	uart_init();
 	uart_set_io_streams();
-	//
-	//// Enable global interrupts
+	
+	// Enable global interrupts
 	sei();
 
 	// Super loop
@@ -65,8 +64,8 @@ int main (void)
 
 void setup_pins()
 {
-	DDRB |= _BV(DDB5);
-	PORTB |= _BV(PORTB5);
+	DDRB |= _BV(DDB7);
+	PORTB |= _BV(PORTB7);
 }
 
 void setup_timer()
@@ -89,7 +88,7 @@ void command_to_polar(char* in_str, struct polar_coordinate* out_polar_coord)
 ISR(USART_RX_vect)
 {
 	char receivedByte = UDR0; // Fetch the received byte value into the variable "ByteReceived"
-	PORTB ^= _BV(PORTB5); // toggle the LED
+	PORTB ^= _BV(PORTB7); // toggle the LED
 	if(receivedByte != '\n')
 	{
 		strncat(input_command_str, &receivedByte, sizeof(receivedByte));
