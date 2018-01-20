@@ -20,10 +20,10 @@ void uart_init()
 	UCSR0B = _BV(TXEN0) | _BV(RXEN0) | _BV(RXCIE0);		/* Enable Tx, Rx, and interrupt on receive*/
 }
 
-void uart_set_io_streams()
+void uart_set_io_streams(FILE *input_stream, FILE *output_stream)
 {
-	stdin = &uart_input;
-	stdout =  &uart_output;
+	input_stream = &uart_input;
+	output_stream =  &uart_output;
 }
 
 void uart_putchar(char c, FILE *stream) 

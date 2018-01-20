@@ -6,7 +6,6 @@
  //*/ 
  
 #include <avr/interrupt.h>
-#include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
 #include "uart.h"
@@ -30,10 +29,10 @@ struct polar_coordinate
 	double dir;	
 };
 
-volatile bool loop_run_flag = false;
-char input_command_str[BUF_SIZE];
+volatile int LOOP_RUN_FLAG = 0;
+char INPUT_COMMAND_STRING[BUF_SIZE];
 // TODO: refactor current_command
-struct polar_coordinate current_command;
+struct polar_coordinate CURRENT_COMMAND;
 
 void setup_pins();
 void setup_timer();
@@ -42,13 +41,15 @@ int main (void)
 {
 	
 	// Initialize
-	current_command.mag = 0.0;
-	current_command.dir = 0.0;
+	CURRENT_COMMAND.mag = 0.0;
+	CURRENT_COMMAND.dir = 0.0;
 	
 	setup_pins();
 	setup_timer();
 	uart_init();
-	uart_set_io_streams();
+	//uart_set_io_streams(stdin, stdout);
+    stdin = &uart_input;
+    stdout =  &uart_output;
 	
 	// Enable global interrupts
 	sei();
@@ -56,9 +57,9 @@ int main (void)
 	// Super loop
 	while(1) 
 	{
-		while(loop_run_flag == false);
-		loop_run_flag = false;
-		printf("mag: %i, dir %i\n", (int) current_command.mag, (int) current_command.dir);
+		while(LOOP_RUN_FLAG == 0);
+		LOOP_RUN_FLAG = 0;
+		printf("mag: %i, dir %i\n", (int) CURRENT_COMMAND.mag, (int) CURRENT_COMMAND.dir);
 	}
 }
 
@@ -85,25 +86,26 @@ void command_to_polar(char* in_str, struct polar_coordinate* out_polar_coord)
 	
 }
 
-ISR(USART_RX_vect)
+// Incoming message interrupt
+ISR(USART0_RX_vect)
 {
-	char receivedByte = UDR0; // Fetch the received byte value into the variable "ByteReceived"
-	PORTB ^= _BV(PORTB7); // toggle the LED
+	char receivedByte = UDR0; // Fetch incoming byte
+	PORTB ^= _BV(PORTB7);
 	if(receivedByte != '\n')
 	{
-		strncat(input_command_str, &receivedByte, sizeof(receivedByte));
+		strncat(INPUT_COMMAND_STRING, &receivedByte, sizeof(receivedByte));
 	}
 	else
 	{
-		command_to_polar(input_command_str, &current_command);
-		memset(input_command_str, 0, sizeof(input_command_str));
+		command_to_polar(INPUT_COMMAND_STRING, &CURRENT_COMMAND);
+		memset(INPUT_COMMAND_STRING, 0, sizeof(INPUT_COMMAND_STRING));
 	}
 }
 
-
-ISR(TIMER1_COMPA_vect) // this function is called every time the timer reaches the threshold we set
-{ 
-	loop_run_flag = true;
+// Timer interrupt
+ISR(TIMER1_COMPA_vect)
+{
+	LOOP_RUN_FLAG = 1;
 }
 
 
