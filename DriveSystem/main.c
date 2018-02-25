@@ -8,6 +8,7 @@
 #include <avr/interrupt.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 #include "uart.h"
 
 #ifndef F_CPU
@@ -20,8 +21,24 @@
 #define F_CLK_8 F_CPU / 8UL
 
 #define TIMER_PRESCALE 10
-
 #define BUF_SIZE 32
+
+// control system
+struct drive_motor
+{
+	int8_t operating_level;
+};
+
+// control system
+struct drive_motors
+{
+	struct drive_motor front_left;
+	struct drive_motor center_left;
+	struct drive_motor rear_left;
+	struct drive_motor front_right;
+	struct drive_motor center_right;
+	struct drive_motor rear_right;
+};
 
 struct polar_coordinate
 {
@@ -43,6 +60,10 @@ int main (void)
 	// Initialize
 	CURRENT_COMMAND.mag = 0.0;
 	CURRENT_COMMAND.dir = 0.0;
+	struct drive_motors target_motor_state;
+	struct drive_motors current_motor_state;
+	
+	
 	
 	setup_pins();
 	setup_timer();
@@ -59,7 +80,7 @@ int main (void)
 	{
 		while(LOOP_RUN_FLAG == 0);
 		LOOP_RUN_FLAG = 0;
-		printf("mag: %i, dir %i\n", (int) CURRENT_COMMAND.mag, (int) CURRENT_COMMAND.dir);
+		//printf("mag: %i, dir %i\n", (int) CURRENT_COMMAND.mag, (int) CURRENT_COMMAND.dir);
 	}
 }
 
@@ -86,11 +107,28 @@ void command_to_polar(char* in_str, struct polar_coordinate* out_polar_coord)
 	
 }
 
+// control system
+struct drive_motors skid_steer_output(struct polar_coordinate command)
+{
+	struct drive_motors output_levels;
+	int8_t left_point = command.mag * (sin(command.dir)+cos(command.dir));
+	int8_t right_point = command.mag * (sin(command.dir)-cos(command.dir));
+	output_levels.front_left.operating_level = left_point;
+	output_levels.front_left.operating_level = left_point;
+	output_levels.front_left.operating_level = left_point;
+	output_levels.front_right.operating_level = right_point;
+	output_levels.front_right.operating_level = right_point;
+	output_levels.front_right.operating_level = right_point;
+	return output_levels;
+}
+
 // Incoming message interrupt
 ISR(USART0_RX_vect)
 {
 	char receivedByte = UDR0; // Fetch incoming byte
+	UDR0 = receivedByte;
 	PORTB ^= _BV(PORTB7);
+	//printf("%c", receivedByte);
 	if(receivedByte != '\n')
 	{
 		strncat(INPUT_COMMAND_STRING, &receivedByte, sizeof(receivedByte));
@@ -98,7 +136,7 @@ ISR(USART0_RX_vect)
 	else
 	{
 		command_to_polar(INPUT_COMMAND_STRING, &CURRENT_COMMAND);
-		memset(INPUT_COMMAND_STRING, 0, sizeof(INPUT_COMMAND_STRING));
+		memset(INPUT_COMMAND_STRING, 0, sizeof(INPUT_COMMAND_STRING)); // reset INPUT_COMMAND_STRING
 	}
 }
 
