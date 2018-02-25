@@ -55,7 +55,7 @@ struct skid_steer
 volatile int LOOP_RUN_FLAG = 0;
 char INPUT_COMMAND_STRING[BUF_SIZE];
 // TODO: refactor current_command
-struct polar_coordinate CURRENT_COMMAND;
+struct skid_steer CURRENT_SKID_COMMAND;
 
 void setup_pins();
 void setup_timer();
@@ -64,12 +64,10 @@ int main (void)
 {
 	
 	// Initialize
-	CURRENT_COMMAND.mag = 0.0;
-	CURRENT_COMMAND.dir = 0.0;
+	CURRENT_SKID_COMMAND.left = 0.0;
+	CURRENT_SKID_COMMAND.right = 0.0;
 	struct drive_motors target_motor_state;
 	struct drive_motors current_motor_state;
-	
-	
 	
 	setup_pins();
 	setup_timer();
@@ -86,7 +84,10 @@ int main (void)
 	{
 		while(LOOP_RUN_FLAG == 0);
 		LOOP_RUN_FLAG = 0;
-		//printf("mag: %i, dir %i\n", (int) CURRENT_COMMAND.mag, (int) CURRENT_COMMAND.dir);
+		
+		// CURRENT_SKID_COMMAND is set, do something
+		printf("left: %i, right: %i\n", (int) (10000*CURRENT_SKID_COMMAND.left), (int) (10000*CURRENT_SKID_COMMAND.right));
+		
 	}
 }
 
@@ -113,12 +114,20 @@ void command_to_polar(char* in_str, struct polar_coordinate* out_polar_coord)
 	
 }
 
+void command_to_skid_steer(char* in_str, struct skid_steer* out_skid_steer)
+{
+	char* left_str = strtok(in_str, " ");
+	out_skid_steer->left = atof(left_str);
+	char* right_str = strtok(NULL, " ");
+	out_skid_steer->right = atof(right_str);
+}
+
 // control system
-struct drive_motors skid_steer_output(struct polar_coordinate command)
+struct drive_motors skid_steer_output(struct skid_steer command)
 {
 	struct drive_motors output_levels;
-	int8_t left_point = command.mag * (sin(command.dir)+cos(command.dir));
-	int8_t right_point = command.mag * (sin(command.dir)-cos(command.dir));
+	int8_t left_point = command.left;
+	int8_t right_point = command.right;
 	output_levels.front_left.operating_level = left_point;
 	output_levels.front_left.operating_level = left_point;
 	output_levels.front_left.operating_level = left_point;
@@ -132,15 +141,15 @@ struct drive_motors skid_steer_output(struct polar_coordinate command)
 ISR(USART0_RX_vect)
 {
 	char receivedByte = UDR0; // Fetch incoming byte
-	UDR0 = receivedByte;
-	PORTB ^= _BV(PORTB7);
+	// UDR0 = receivedByte; // Echo directly back
+	PORTB ^= _BV(PORTB7); // Toggle led for display
 	if(receivedByte != '\n')
 	{
 		strncat(INPUT_COMMAND_STRING, &receivedByte, sizeof(receivedByte));
 	}
 	else
 	{
-		command_to_polar(INPUT_COMMAND_STRING, &CURRENT_COMMAND);
+		command_to_skid_steer(INPUT_COMMAND_STRING, &CURRENT_SKID_COMMAND);
 		memset(INPUT_COMMAND_STRING, 0, sizeof(INPUT_COMMAND_STRING)); // reset INPUT_COMMAND_STRING
 	}
 }
