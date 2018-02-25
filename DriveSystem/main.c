@@ -23,6 +23,9 @@
 #define TIMER_PRESCALE 10
 #define BUF_SIZE 32
 
+#define COUNTER_MAX_16 65535;
+#define THRUST_LEVEL 255;
+
 // control system
 struct drive_motor
 {
@@ -48,9 +51,13 @@ struct polar_coordinate
 
 struct skid_steer
 {
-	double left;
-	double right;
+	int left_dir;
+	double left_pwm;
+	int right_dir;
+	double right_pwm;
 };
+
+void set_motor_controls(struct skid_steer* skid_steer_cmd);
 
 volatile int LOOP_RUN_FLAG = 0;
 char INPUT_COMMAND_STRING[BUF_SIZE];
@@ -64,8 +71,10 @@ int main (void)
 {
 	
 	// Initialize
-	CURRENT_SKID_COMMAND.left = 0.0;
-	CURRENT_SKID_COMMAND.right = 0.0;
+	CURRENT_SKID_COMMAND.left_pwm = 0.0;
+	CURRENT_SKID_COMMAND.left_dir = 1;
+	CURRENT_SKID_COMMAND.right_pwm = 0.0;
+	CURRENT_SKID_COMMAND.right_dir = 1;
 	struct drive_motors target_motor_state;
 	struct drive_motors current_motor_state;
 	
@@ -86,23 +95,47 @@ int main (void)
 		LOOP_RUN_FLAG = 0;
 		
 		// CURRENT_SKID_COMMAND is set, do something
-		printf("left: %i, right: %i\n", (int) (10000*CURRENT_SKID_COMMAND.left), (int) (10000*CURRENT_SKID_COMMAND.right));
-		
+		//printf("left: %i, right: %i\n", (int) (10000*CURRENT_SKID_COMMAND.left_pwm), (int) (10000*CURRENT_SKID_COMMAND.right_pwm));
+		//printf("dir_left: %i, dir_right: %i\n", CURRENT_SKID_COMMAND.left_dir, CURRENT_SKID_COMMAND.right_dir);
+		set_motor_controls(&CURRENT_SKID_COMMAND);
 	}
 }
 
 void setup_pins()
 {
+
+	
+	// left motor PWM
+	// pin 12 (OC1B) 
+	DDRB |= _BV(DDB6);
+	PORTB |= _BV(PORTB6);
+	// left motor direction
+	// pin 10
+	DDRB |= _BV(DDB4);
+	PORTB |= _BV(PORTB4);
+	
+	// right motor PWM
+	// pin 11 (OC1A)
+	DDRB |= _BV(DDB5);
+	PORTB |= _BV(PORTB5);
+	// right motor direction
+	// pin 13
 	DDRB |= _BV(DDB7);
 	PORTB |= _BV(PORTB7);
 }
 
 void setup_timer()
 {
-	TCCR1B |= _BV(WGM12); // configure timer1 for CTC mode
-	TIMSK1 |= _BV(OCIE1A); // enable the CTC interrupt b
-	TCCR1B |= _BV(CS10) | _BV(CS12); // start the timer at 16MHz/1024
-	OCR1A = F_CLK_1024; // set the CTC compare value
+	TCCR3B |= _BV(WGM32); // configure timer1 for CTC mode
+	TIMSK3 |= _BV(OCIE3A); // enable the CTC interrupt b
+	TCCR3B |= _BV(CS31); 
+	OCR3A = COUNTER_MAX_16;
+	
+	TCCR1A |= _BV(COM1A1) | _BV(COM1B1); // set none-inverting mode
+	TCCR1A |= _BV(WGM10); // set PWN Phase Corrected
+	TCCR1B |= _BV(CS11); // start the timer at 16MHz/1024
+	OCR1A = 0; // set the CTC compare value = left motor
+	OCR1B = 0; // set the CTC compare value = right motor
 }
 
 void command_to_polar(char* in_str, struct polar_coordinate* out_polar_coord)
@@ -111,38 +144,58 @@ void command_to_polar(char* in_str, struct polar_coordinate* out_polar_coord)
 	out_polar_coord->mag = atof(mag_str);
 	char* dir_str = strtok(NULL, " ");
 	out_polar_coord->dir = atof(dir_str);
-	
 }
 
 void command_to_skid_steer(char* in_str, struct skid_steer* out_skid_steer)
 {
 	char* left_str = strtok(in_str, " ");
-	out_skid_steer->left = atof(left_str);
+	float left_f = atof(left_str);
+	out_skid_steer->left_pwm = fabs(left_f);
+	out_skid_steer->left_dir = (left_f < 0) ? 0 : 1;
 	char* right_str = strtok(NULL, " ");
-	out_skid_steer->right = atof(right_str);
+	float right_f = atof(right_str);
+	out_skid_steer->right_pwm = fabs(right_f);
+	out_skid_steer->right_dir = (right_f < 0) ? 0 : 1;
+}
+
+void set_motor_controls(struct skid_steer* skid_steer_cmd){
+	// Set the ouput pin levels
+	OCR1A = skid_steer_cmd-> right_pwm * THRUST_LEVEL;
+	OCR1B = skid_steer_cmd-> left_pwm * THRUST_LEVEL;
+	//printf("Output compare A: %u, B: %u\n\n", OCR1A, OCR1B);
+	// Set the direciton pins
+	if(skid_steer_cmd->right_dir == 0)
+		PORTB &= ~(_BV(PORTB7));
+	else
+		PORTB |= _BV(PORTB7);
+	
+	if(skid_steer_cmd->left_dir == 0)
+		PORTB &= ~(_BV(PORTB4));
+	else
+		PORTB |= _BV(PORTB4);
+	
 }
 
 // control system
-struct drive_motors skid_steer_output(struct skid_steer command)
-{
-	struct drive_motors output_levels;
-	int8_t left_point = command.left;
-	int8_t right_point = command.right;
-	output_levels.front_left.operating_level = left_point;
-	output_levels.front_left.operating_level = left_point;
-	output_levels.front_left.operating_level = left_point;
-	output_levels.front_right.operating_level = right_point;
-	output_levels.front_right.operating_level = right_point;
-	output_levels.front_right.operating_level = right_point;
-	return output_levels;
-}
+//struct drive_motors skid_steer_output(struct skid_steer command)
+//{
+	//struct drive_motors output_levels;
+	//int8_t left_point = command.left;
+	//int8_t right_point = command.right;
+	//output_levels.front_left.operating_level = left_point;
+	//output_levels.front_left.operating_level = left_point;
+	//output_levels.front_left.operating_level = left_point;
+	//output_levels.front_right.operating_level = right_point;
+	//output_levels.front_right.operating_level = right_point;
+	//output_levels.front_right.operating_level = right_point;
+	//return output_levels;
+//}
 
 // Incoming message interrupt
 ISR(USART0_RX_vect)
 {
 	char receivedByte = UDR0; // Fetch incoming byte
 	// UDR0 = receivedByte; // Echo directly back
-	PORTB ^= _BV(PORTB7); // Toggle led for display
 	if(receivedByte != '\n')
 	{
 		strncat(INPUT_COMMAND_STRING, &receivedByte, sizeof(receivedByte));
@@ -155,7 +208,7 @@ ISR(USART0_RX_vect)
 }
 
 // Timer interrupt
-ISR(TIMER1_COMPA_vect)
+ISR(TIMER3_COMPA_vect)
 {
 	LOOP_RUN_FLAG = 1;
 }
