@@ -46,6 +46,12 @@ struct polar_coordinate
 	double dir;	
 };
 
+struct skid_steer
+{
+	double left;
+	double right;
+};
+
 volatile int LOOP_RUN_FLAG = 0;
 char INPUT_COMMAND_STRING[BUF_SIZE];
 // TODO: refactor current_command
@@ -128,7 +134,6 @@ ISR(USART0_RX_vect)
 	char receivedByte = UDR0; // Fetch incoming byte
 	UDR0 = receivedByte;
 	PORTB ^= _BV(PORTB7);
-	//printf("%c", receivedByte);
 	if(receivedByte != '\n')
 	{
 		strncat(INPUT_COMMAND_STRING, &receivedByte, sizeof(receivedByte));
