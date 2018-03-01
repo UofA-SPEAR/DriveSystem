@@ -4,12 +4,13 @@
  //* Created: 2018-01-16 11:16:23 AM
  //* Author : Brad and Brian Ofrim
  //*/ 
- 
+#include <avr/wdt.h> 
 #include <avr/interrupt.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
 #include "uart.h"
+
 
 #ifndef F_CPU
 #define F_CPU 16000000UL
@@ -23,8 +24,11 @@
 #define TIMER_PRESCALE 10
 #define BUF_SIZE 32
 
-#define COUNTER_MAX_16 65535;
-#define THRUST_LEVEL 255;
+#define COUNTER_MAX_16 65535
+#define THRUST_LEVEL 128
+
+// watchdog time outs
+#define WDTO_500MS 5
 
 // control system
 struct drive_motor
@@ -57,6 +61,14 @@ struct skid_steer
 	double right_pwm;
 };
 
+void WDT_interrupt_enable(void)
+{
+	/* Timed sequence writing WDCE and WDE. See datasheet chp. 13*/
+	WDTCSR |= (1<<WDCE)|(1<<WDE);				//Change enabled
+	WDTCSR = (1<< WDIE)|(1<<WDP2)|(1<<WDP0);	//Configure interrupt with 1 sec timeout
+	
+}
+
 void set_motor_controls(struct skid_steer* skid_steer_cmd);
 
 volatile int LOOP_RUN_FLAG = 0;
@@ -67,14 +79,21 @@ struct skid_steer CURRENT_SKID_COMMAND;
 void setup_pins();
 void setup_timer();
 
-int main (void) 
-{
-	
-	// Initialize
+
+void reset_motor_instructions(){
 	CURRENT_SKID_COMMAND.left_pwm = 0.0;
 	CURRENT_SKID_COMMAND.left_dir = 1;
 	CURRENT_SKID_COMMAND.right_pwm = 0.0;
 	CURRENT_SKID_COMMAND.right_dir = 1;
+}
+
+int main (void) 
+{
+	// disable watchdog during initialization
+	//wdt_disable();
+	// Initialize
+	reset_motor_instructions();
+	
 	struct drive_motors target_motor_state;
 	struct drive_motors current_motor_state;
 	
@@ -85,9 +104,12 @@ int main (void)
     stdin = &uart_input;
     stdout =  &uart_output;
 	
+	// Enable the watchdog timer
+	WDT_interrupt_enable();
+	
 	// Enable global interrupts
 	sei();
-
+	
 	// Super loop
 	while(1) 
 	{
@@ -204,6 +226,7 @@ ISR(USART0_RX_vect)
 	{
 		command_to_skid_steer(INPUT_COMMAND_STRING, &CURRENT_SKID_COMMAND);
 		memset(INPUT_COMMAND_STRING, 0, sizeof(INPUT_COMMAND_STRING)); // reset INPUT_COMMAND_STRING
+		wdt_reset(); // reset the watchdog
 	}
 }
 
@@ -213,5 +236,10 @@ ISR(TIMER3_COMPA_vect)
 	LOOP_RUN_FLAG = 1;
 }
 
+ISR(WDT_vect) {
+	WDTCSR |= (1<<WDIF);
+	//printf("wdt\n");
+	reset_motor_instructions();
+}
 
 
