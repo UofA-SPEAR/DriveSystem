@@ -116,21 +116,6 @@ void setup_timer()
 	OCR1B = 0; // set the CTC compare value = right motor
 }
 
-// control system
-//struct drive_motors skid_steer_output(struct skid_steer command)
-//{
-	//struct drive_motors output_levels;
-	//int8_t left_point = command.left;
-	//int8_t right_point = command.right;
-	//output_levels.front_left.operating_level = left_point;
-	//output_levels.front_left.operating_level = left_point;
-	//output_levels.front_left.operating_level = left_point;
-	//output_levels.front_right.operating_level = right_point;
-	//output_levels.front_right.operating_level = right_point;
-	//output_levels.front_right.operating_level = right_point;
-	//return output_levels;
-//}
-
 // Incoming message interrupt
 ISR(USART0_RX_vect)
 {
