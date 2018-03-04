@@ -31,37 +31,6 @@
 // watchdog time outs
 #define WDTO_500MS 5
 
-// control system
-struct drive_motor
-{
-	int8_t operating_level;
-};
-
-// control system
-struct drive_motors
-{
-	struct drive_motor front_left;
-	struct drive_motor center_left;
-	struct drive_motor rear_left;
-	struct drive_motor front_right;
-	struct drive_motor center_right;
-	struct drive_motor rear_right;
-};
-
-struct polar_coordinate
-{
-	double mag;
-	double dir;	
-};
-
-struct skid_steer
-{
-	int left_dir;
-	double left_pwm;
-	int right_dir;
-	double right_pwm;
-};
-
 void WDT_interrupt_enable(void)
 {
 	/* Timed sequence writing WDCE and WDE. See datasheet chp. 13*/
