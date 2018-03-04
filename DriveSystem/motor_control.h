@@ -42,7 +42,7 @@ struct skid_steer
 };
 
 void set_motor_controls(struct skid_steer* skid_steer_cmd);
-
+void reset_motor_instructions(struct skid_steer* command);
 
 
 

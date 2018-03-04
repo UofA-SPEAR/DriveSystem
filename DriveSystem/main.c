@@ -41,26 +41,17 @@ void WDT_interrupt_enable(void)
 
 volatile int LOOP_RUN_FLAG = 0;
 char INPUT_COMMAND_STRING[BUF_SIZE];
-// TODO: refactor current_command
 struct skid_steer CURRENT_SKID_COMMAND;
 
 void setup_pins();
 void setup_timer();
-
-
-void reset_motor_instructions(){
-	CURRENT_SKID_COMMAND.left_pwm = 0.0;
-	CURRENT_SKID_COMMAND.left_dir = 1;
-	CURRENT_SKID_COMMAND.right_pwm = 0.0;
-	CURRENT_SKID_COMMAND.right_dir = 1;
-}
 
 int main (void) 
 {
 	// disable watchdog during initialization
 	//wdt_disable();
 	// Initialize
-	reset_motor_instructions();
+	reset_motor_instructions(&CURRENT_SKID_COMMAND);
 	
 	struct drive_motors target_motor_state;
 	struct drive_motors current_motor_state;
@@ -191,7 +182,7 @@ ISR(TIMER3_COMPA_vect)
 ISR(WDT_vect) {
 	WDTCSR |= (1<<WDIF);
 	//printf("wdt\n");
-	reset_motor_instructions();
+	reset_motor_instructions(&CURRENT_SKID_COMMAND);
 }
 
 

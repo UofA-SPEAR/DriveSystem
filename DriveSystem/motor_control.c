@@ -6,7 +6,8 @@
  */ 
 #include "motor_control.h"
 
-void set_motor_controls(struct skid_steer* skid_steer_cmd){
+void set_motor_controls(struct skid_steer* skid_steer_cmd)
+{
 	// Set the ouput pin levels
 	OCR1A = skid_steer_cmd-> right_pwm * MAX_THRUST_LEVEL;
 	OCR1B = skid_steer_cmd-> left_pwm * MAX_THRUST_LEVEL;
@@ -22,4 +23,12 @@ void set_motor_controls(struct skid_steer* skid_steer_cmd){
 	else
 	PORTB |= _BV(PORTB4);
 	
+}
+
+void reset_motor_instructions(struct skid_steer* command)
+{
+	command->left_pwm = 0.0;
+	command->left_dir = 1;
+	command->right_pwm = 0.0;
+	command->right_dir = 1;
 }
