@@ -52,3 +52,17 @@ void command_to_skid_steer(char* in_str, struct skid_steer* out_skid_steer)
 	out_skid_steer->right_pwm = fabs(right_f);
 	out_skid_steer->right_dir = (right_f < 0) ? 0 : 1;
 }
+
+//struct drive_motors skid_steer_output(struct skid_steer command)
+//{
+//struct drive_motors output_levels;
+//int8_t left_point = command.left;
+//int8_t right_point = command.right;
+//output_levels.front_left.operating_level = left_point;
+//output_levels.front_left.operating_level = left_point;
+//output_levels.front_left.operating_level = left_point;
+//output_levels.front_right.operating_level = right_point;
+//output_levels.front_right.operating_level = right_point;
+//output_levels.front_right.operating_level = right_point;
+//return output_levels;
+//}
