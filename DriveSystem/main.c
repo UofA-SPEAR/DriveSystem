@@ -26,7 +26,6 @@
 #define BUF_SIZE 32
 
 #define COUNTER_MAX_16 65535
-#define THRUST_LEVEL 128
 
 // watchdog time outs
 #define WDTO_500MS 5
@@ -39,7 +38,6 @@ void WDT_interrupt_enable(void)
 	
 }
 
-void set_motor_controls(struct skid_steer* skid_steer_cmd);
 
 volatile int LOOP_RUN_FLAG = 0;
 char INPUT_COMMAND_STRING[BUF_SIZE];
@@ -150,23 +148,7 @@ void command_to_skid_steer(char* in_str, struct skid_steer* out_skid_steer)
 	out_skid_steer->right_dir = (right_f < 0) ? 0 : 1;
 }
 
-void set_motor_controls(struct skid_steer* skid_steer_cmd){
-	// Set the ouput pin levels
-	OCR1A = skid_steer_cmd-> right_pwm * THRUST_LEVEL;
-	OCR1B = skid_steer_cmd-> left_pwm * THRUST_LEVEL;
-	//printf("Output compare A: %u, B: %u\n\n", OCR1A, OCR1B);
-	// Set the direciton pins
-	if(skid_steer_cmd->right_dir == 0)
-		PORTB &= ~(_BV(PORTB7));
-	else
-		PORTB |= _BV(PORTB7);
-	
-	if(skid_steer_cmd->left_dir == 0)
-		PORTB &= ~(_BV(PORTB4));
-	else
-		PORTB |= _BV(PORTB4);
-	
-}
+
 
 // control system
 //struct drive_motors skid_steer_output(struct skid_steer command)

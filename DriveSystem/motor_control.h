@@ -8,6 +8,9 @@
 
 #ifndef MOTOR_CONTROL_H_
 #define MOTOR_CONTROL_H_
+#include <avr/io.h>
+
+#define MAX_THRUST_LEVEL 128
 
 struct drive_motor
 {
@@ -37,6 +40,9 @@ struct skid_steer
 	int right_dir;
 	double right_pwm;
 };
+
+void set_motor_controls(struct skid_steer* skid_steer_cmd);
+
 
 
 
