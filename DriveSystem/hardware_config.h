@@ -40,9 +40,9 @@
  * Configure register used for controlling motor speed
  * These registers are the output compare registers used in PWM signals
  */
-#define LEFT_PWM_REG			OCR1B
+#define LEFT_PWM_LEVEL			OCR1B
 #define LEFT_PWM_PIN			PORTB6
-#define RIGHT_PWM_REG			OCR1A
+#define RIGHT_PWM_LEVEL			OCR1A
 #define RIGHT_PWM_PIN			PORTB5
 
 #endif /* HARDWARE_CONFIG_H_ */
