@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "uart.h"
+#include "motor_control.h"
 
 
 #ifndef F_CPU
