@@ -2,6 +2,7 @@
 #define UART_H
 
 #include <stdio.h>
+#include "hardware_config.h"
 
 #ifndef F_CPU
 #define F_CPU 16000000UL

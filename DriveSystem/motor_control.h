@@ -12,6 +12,7 @@
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
+#include "hardware_config.h"
 
 #define MAX_THRUST_LEVEL 128
 

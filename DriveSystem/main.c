@@ -6,6 +6,7 @@
  //*/ 
 #include <avr/wdt.h> 
 #include <avr/interrupt.h>
+#include "hardware_config.h"
 #include "uart.h"
 #include "motor_control.h"
 
