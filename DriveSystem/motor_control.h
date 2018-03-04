@@ -9,6 +9,9 @@
 #ifndef MOTOR_CONTROL_H_
 #define MOTOR_CONTROL_H_
 #include <avr/io.h>
+#include <string.h>
+#include <math.h>
+#include <stdlib.h>
 
 #define MAX_THRUST_LEVEL 128
 
@@ -43,6 +46,8 @@ struct skid_steer
 
 void set_motor_controls(struct skid_steer* skid_steer_cmd);
 void reset_motor_instructions(struct skid_steer* command);
+void command_to_polar(char* in_str, struct polar_coordinate* out_polar_coord);
+void command_to_skid_steer(char* in_str, struct skid_steer* out_skid_steer);
 
 
 

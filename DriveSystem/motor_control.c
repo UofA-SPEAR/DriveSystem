@@ -32,3 +32,23 @@ void reset_motor_instructions(struct skid_steer* command)
 	command->right_pwm = 0.0;
 	command->right_dir = 1;
 }
+
+void command_to_polar(char* in_str, struct polar_coordinate* out_polar_coord)
+{
+	char* mag_str = strtok(in_str, " ");
+	out_polar_coord->mag = atof(mag_str);
+	char* dir_str = strtok(NULL, " ");
+	out_polar_coord->dir = atof(dir_str);
+}
+
+void command_to_skid_steer(char* in_str, struct skid_steer* out_skid_steer)
+{
+	char* left_str = strtok(in_str, " ");
+	float left_f = atof(left_str);
+	out_skid_steer->left_pwm = fabs(left_f);
+	out_skid_steer->left_dir = (left_f < 0) ? 0 : 1;
+	char* right_str = strtok(NULL, " ");
+	float right_f = atof(right_str);
+	out_skid_steer->right_pwm = fabs(right_f);
+	out_skid_steer->right_dir = (right_f < 0) ? 0 : 1;
+}
