@@ -27,8 +27,10 @@
 /*
  * Configure registers used for controlling motor direction
  */
-#define LEFT_DIR_REG			PORTB
-#define RIGHT_DIR_REG			PORTB
+#define LEFT_DIR_REG				PORTB
+#define LEFT_PWM_REG				PORTB
+#define RIGHT_DIR_REG				PORTB
+#define RIGHT_PWM_REG				PORTB
 
 /*
  * Configure pins used for controlling motor direction
