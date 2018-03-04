@@ -9,6 +9,8 @@
 #ifndef HARDWARE_CONFIG_H_
 #define HARDWARE_CONFIG_H_
 
+/* Motor Controls */
+
 /*
  * Configure registers used for controlling motor direction
  */

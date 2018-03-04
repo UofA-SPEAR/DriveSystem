@@ -11,7 +11,6 @@ void set_motor_controls(struct skid_steer* skid_steer_cmd)
 	// Set the ouput pin levels
 	RIGHT_PWM_REG = skid_steer_cmd-> right_pwm * MAX_THRUST_LEVEL;
 	LEFT_PWM_REG = skid_steer_cmd-> left_pwm * MAX_THRUST_LEVEL;
-	//printf("Output compare A: %u, B: %u\n\n", OCR1A, OCR1B);
 	// Set the direciton pins
 	if(skid_steer_cmd->right_dir == 0)
 		RIGHT_DIR_REG &= ~(_BV(RIGHT_DIR_PIN));
