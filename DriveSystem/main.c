@@ -82,25 +82,18 @@ int main (void)
 
 void setup_pins()
 {
-
-	
 	// left motor PWM
-	// pin 12 (OC1B) 
-	DDRB |= _BV(DDB6);
-	PORTB |= _BV(PORTB6);
+	LEFT_PWM_IO_REG |= _BV(LEFT_PWM_IO_PIN);
+	LEFT_PWM_REG |= _BV(LEFT_PWM_PIN);
 	// left motor direction
-	// pin 10
-	DDRB |= _BV(DDB4);
-	PORTB |= _BV(PORTB4);
-	
+	LEFT_DIR_IO_REG |= _BV(LEFT_DIR_IO_PIN);
+	LEFT_DIR_REG |= _BV(LEFT_DIR_PIN);
 	// right motor PWM
-	// pin 11 (OC1A)
-	DDRB |= _BV(DDB5);
-	PORTB |= _BV(PORTB5);
+	RIGHT_PWM_IO_REG |= _BV(RIGHT_PWM_IO_PIN);
+	RIGHT_PWM_REG |= _BV(RIGHT_PWM_PIN);
 	// right motor direction
-	// pin 13
-	DDRB |= _BV(DDB7);
-	PORTB |= _BV(PORTB7);
+	RIGHT_DIR_IO_REG |= _BV(RIGHT_DIR_IO_PIN);
+	RIGHT_DIR_REG |= _BV(RIGHT_DIR_PIN);
 }
 
 void setup_timer()
