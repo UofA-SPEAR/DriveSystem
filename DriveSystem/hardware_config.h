@@ -9,6 +9,30 @@
 #ifndef HARDWARE_CONFIG_H_
 #define HARDWARE_CONFIG_H_
 
+/* CPU */
+
+/*
+ * Specifies the frequency that the MCU operates at
+ */
+#ifndef F_CPU
+#define F_CPU 16000000UL
+#endif
+
+#define F_CLK_1024 F_CPU / 1024UL
+#define F_CLK_256 F_CPU / 256UL
+#define F_CLK_64 F_CPU / 64UL
+#define F_CLK_8 F_CPU / 8UL
+
+/* Timer */
+
+
+/* Communications */
+/*
+ * USART interface
+ */
+#define USART0_RX_BUF				UDR0 // Read from
+#define USART0_TX_BUF				UDR0 // Write to  
+
 /* Motor Controls */
 
 /*
@@ -46,5 +70,7 @@
 #define LEFT_PWM_PIN			PORTB6
 #define RIGHT_PWM_LEVEL			OCR1A
 #define RIGHT_PWM_PIN			PORTB5
+
+
 
 #endif /* HARDWARE_CONFIG_H_ */

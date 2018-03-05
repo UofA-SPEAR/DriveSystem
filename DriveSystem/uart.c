@@ -29,15 +29,13 @@ void uart_set_io_streams(FILE *input_stream, FILE *output_stream)
 void uart_putchar(char c, FILE *stream) 
 {
 	if (c == '\n') 
-    {
 		uart_putchar('\r', stream);
-	}
 	loop_until_bit_is_set(UCSR0A, UDRE0);
-	UDR0 = c;
+	USART0_TX_BUF = c;
 }
 
 char uart_getchar(FILE *stream) 
 {
 	loop_until_bit_is_set(UCSR0A, RXC0);
-	return UDR0;
+	return USART0_RX_BUF;
 }

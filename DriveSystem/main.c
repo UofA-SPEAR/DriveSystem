@@ -11,18 +11,10 @@
 #include "motor_control.h"
 
 
-#ifndef F_CPU
-#define F_CPU 16000000UL
-#endif
 
-#define F_CLK_1024 F_CPU / 1024UL
-#define F_CLK_256 F_CPU / 256UL
-#define F_CLK_64 F_CPU / 64UL
-#define F_CLK_8 F_CPU / 8UL
 
 #define TIMER_PRESCALE 10
 #define BUF_SIZE 32
-
 #define COUNTER_MAX_16 65535
 
 // watchdog time outs
@@ -33,7 +25,6 @@ void WDT_interrupt_enable(void)
 	/* Timed sequence writing WDCE and WDE. See datasheet chp. 13*/
 	WDTCSR |= (1<<WDCE)|(1<<WDE);				//Change enabled
 	WDTCSR = (1<< WDIE)|(1<<WDP2)|(1<<WDP0);	//Configure interrupt with 1 sec timeout
-	
 }
 
 
@@ -113,8 +104,8 @@ void setup_timer()
 // Incoming message interrupt
 ISR(USART0_RX_vect)
 {
-	char receivedByte = UDR0; // Fetch incoming byte
-	// UDR0 = receivedByte; // Echo directly back
+	char receivedByte = USART0_RX_BUF; // Fetch incoming byte
+	// USART0_TX_BUF = receivedByte; // Echo directly back
 	if(receivedByte != '\n')
 	{
 		strncat(INPUT_COMMAND_STRING, &receivedByte, sizeof(receivedByte));
