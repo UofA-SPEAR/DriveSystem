@@ -15,7 +15,7 @@ void setup_timer()
 	
 	TCCR1A |= _BV(COM1A1) | _BV(COM1B1); // set none-inverting mode
 	TCCR1A |= _BV(WGM10); // set PWN Phase Corrected
-	TCCR1B |= _BV(CS11); // start the timer at 16MHz/1024
+	TCCR1B |= T1_PRESCALE_32;
 	
 	OCR1A = 0; // set the CTC compare value = left motor
 	OCR1B = 0; // set the CTC compare value = right motor
