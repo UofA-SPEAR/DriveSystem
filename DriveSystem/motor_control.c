@@ -6,6 +6,22 @@
  */ 
 #include "motor_control.h"
 
+void configure_motor_pins()
+{
+	// left motor PWM
+	LEFT_PWM_IO_REG |= _BV(LEFT_PWM_IO_PIN);
+	LEFT_PWM_REG |= _BV(LEFT_PWM_PIN);
+	// left motor direction
+	LEFT_DIR_IO_REG |= _BV(LEFT_DIR_IO_PIN);
+	LEFT_DIR_REG |= _BV(LEFT_DIR_PIN);
+	// right motor PWM
+	RIGHT_PWM_IO_REG |= _BV(RIGHT_PWM_IO_PIN);
+	RIGHT_PWM_REG |= _BV(RIGHT_PWM_PIN);
+	// right motor direction
+	RIGHT_DIR_IO_REG |= _BV(RIGHT_DIR_IO_PIN);
+	RIGHT_DIR_REG |= _BV(RIGHT_DIR_PIN);
+}
+
 void set_motor_controls(struct skid_steer* skid_steer_cmd)
 {
 	// Set the ouput pin levels

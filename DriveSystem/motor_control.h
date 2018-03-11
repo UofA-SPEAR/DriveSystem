@@ -45,6 +45,7 @@ struct skid_steer
 	double right_pwm;
 };
 
+void configure_motor_pins();
 void set_motor_controls(struct skid_steer* skid_steer_cmd);
 void reset_motor_instructions(struct skid_steer* command);
 void command_to_polar(char* in_str, struct polar_coordinate* out_polar_coord);

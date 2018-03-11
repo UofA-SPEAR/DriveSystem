@@ -18,7 +18,6 @@ volatile int LOOP_RUN_FLAG = 0;
 char INPUT_COMMAND_STRING[BUF_SIZE];
 struct skid_steer CURRENT_SKID_COMMAND;
 
-void setup_pins();
 
 int main (void) 
 {
@@ -31,8 +30,8 @@ int main (void)
 	struct drive_motors current_motor_state;
 	
 	setup_timer();
-	setup_pins();
 	uart_init();
+	configure_motor_pins();
 	//uart_set_io_streams(stdin, stdout);
     stdin = &uart_input;
     stdout =  &uart_output;
@@ -54,23 +53,7 @@ int main (void)
 	}
 }
 
-void setup_pins()
-{
-	// left motor PWM
-	LEFT_PWM_IO_REG |= _BV(LEFT_PWM_IO_PIN);
-	LEFT_PWM_REG |= _BV(LEFT_PWM_PIN);
-	// left motor direction
-	LEFT_DIR_IO_REG |= _BV(LEFT_DIR_IO_PIN);
-	LEFT_DIR_REG |= _BV(LEFT_DIR_PIN);
-	// right motor PWM
-	RIGHT_PWM_IO_REG |= _BV(RIGHT_PWM_IO_PIN);
-	RIGHT_PWM_REG |= _BV(RIGHT_PWM_PIN);
-	// right motor direction
-	RIGHT_DIR_IO_REG |= _BV(RIGHT_DIR_IO_PIN);
-	RIGHT_DIR_REG |= _BV(RIGHT_DIR_PIN);
-}
-
-
+/* ------ Interrupts ------ */
 
 // Incoming message interrupt
 ISR(USART0_RX_vect)
