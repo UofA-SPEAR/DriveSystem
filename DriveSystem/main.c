@@ -30,7 +30,9 @@ int main (void)
 	struct drive_motors target_motor_state;
 	struct drive_motors current_motor_state;
 	
+	setup_timer();
 	setup_pins();
+	uart_init();
 	//uart_set_io_streams(stdin, stdout);
     stdin = &uart_input;
     stdout =  &uart_output;
@@ -74,7 +76,7 @@ void setup_pins()
 ISR(USART0_RX_vect)
 {
 	char receivedByte = USART0_RX_BUF; // Fetch incoming byte
-	// USART0_TX_BUF = receivedByte; // Echo directly back
+	USART0_TX_BUF = receivedByte; // Echo directly back
 	if(receivedByte != '\n')
 	{
 		strncat(INPUT_COMMAND_STRING, &receivedByte, sizeof(receivedByte));
