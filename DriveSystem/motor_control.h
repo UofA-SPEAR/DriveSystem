@@ -17,14 +17,14 @@
 #define MAX_THRUST_LEVEL 255
 #define THRUST_LEVEL 128
 #define TRUST_FRAC THRUST_LEVEL / MAX_THRUST_LEVEL
-#define MAX_DELTA THRUST_LEVEL / 255
+#define MAX_DELTA 10
 #define FORWARD_DIR 1
 #define BACKWARD_DIR 0
 
-#define DIR_SIGN(DIR) (DIR == FORWARD_DIR ? 1 : -1)
-#define SIGN_OF(VAL) (VAL > 0 ? 1 : -1)
-#define SIGNED_LEVEL(MAG, DIR_BIT) (MAG * DIR_SIGN(DIR_BIT))
-#define LIMIT_MAG(VAL, LIMIT) ((abs(VAL) < LIMIT ? abs(VAL) : LIMIT) * SIGN_OF(VAL))
+#define DIR_SIGN(DIR) (DIR == FORWARD_DIR ? 1 : -1)										// DIR=FORWARD_DIR -> +1, DIR=BACKWARD_DIR -> -1 
+#define SIGN_OF(VAL) (VAL > 0 ? 1 : -1)													// Positive or negative
+#define SIGNED_LEVEL(MAG, DIR_BIT) (MAG * DIR_SIGN(DIR_BIT))							// Magnitued * signed direction
+#define LIMIT_MAG(VAL, LIMIT) ((abs(VAL) < LIMIT ? abs(VAL) : LIMIT) * SIGN_OF(VAL))	// Cap the magnitude of VAL at LIMIT
 
 
 struct drive_motor

@@ -29,7 +29,7 @@ struct skid_steer CURRENT_SKID_COMMAND;
 int main (void) 
 {
 	fflush(stdout);
-	printf("Start\n");
+	
 	// disable watchdog during initialization
 	//wdt_disable();
 	// Initialize
@@ -46,20 +46,23 @@ int main (void)
     stdout =  &uart_output;
 	
 	// Enable the watchdog timer
-	WDT_interrupt_enable();
+	//WDT_interrupt_enable();
 	
 	// Enable global interrupts
 	sei();
 	
 	// Super loop
-	while(1) 
+	printf("Start\n");
+	 while(1) 
 	{
 		while(LOOP_RUN_FLAG == 0);
 		LOOP_RUN_FLAG = 0;
 		
+		printf("\nCurrent command: mag:%i, dir:%i\n", (int) (100* CURRENT_SKID_COMMAND.right_pwm), (int) CURRENT_SKID_COMMAND.right_dir);
+		
 		// CURRENT_SKID_COMMAND is set, do something
 		update_motor_controls(&CURRENT_SKID_COMMAND);
-		printf("Target: %i, Actual: %i\n", (int) SIGNED_LEVEL(CURRENT_SKID_COMMAND.left_pwm, CURRENT_SKID_COMMAND.left_dir), (int) SIGNED_LEVEL(LEFT_PWM_LEVEL, LEFT_PWM_LEVEL));
+		printf("Target: %i, Actual: %i\n", (int)  SIGNED_LEVEL(CURRENT_SKID_COMMAND.left_pwm * THRUST_LEVEL , CURRENT_SKID_COMMAND.left_dir), (int) SIGNED_LEVEL(LEFT_PWM_LEVEL, READ_REG_BIT(LEFT_DIR_REG, LEFT_DIR_PIN) ));
 	}
 }
 
@@ -68,7 +71,7 @@ int main (void)
 // Incoming message interrupt
 ISR(USART0_RX_vect)
 {
-	printf("USART ISR\n");
+	cli();
 	char receivedByte = USART0_RX_BUF; // Fetch incoming byte
 	USART0_TX_BUF = receivedByte; // Echo directly back
 	if(receivedByte != '\n')
@@ -77,10 +80,13 @@ ISR(USART0_RX_vect)
 	}
 	else
 	{
+		printf("Incoming command string: %s\n", INPUT_COMMAND_STRING);
 		CURRENT_SKID_COMMAND = command_to_skid_steer(INPUT_COMMAND_STRING); // Get the value of the new command
+		printf("Current command in isr: mag:%i, dir:%i\n", (int) (100* CURRENT_SKID_COMMAND.right_pwm), (int) CURRENT_SKID_COMMAND.right_dir);
 		memset(INPUT_COMMAND_STRING, 0, sizeof(INPUT_COMMAND_STRING)); // reset INPUT_COMMAND_STRING
-		wdt_reset(); // reset the watchdog
+		//wdt_reset(); // reset the watchdog
 	}
+	sei();
 }
 
 // Timer interrupt
@@ -89,11 +95,10 @@ ISR(TIMER3_COMPA_vect)
 	LOOP_RUN_FLAG = 1;
 }
 
-ISR(WDT_vect) 
-{
-	WDTCSR |= (1<<WDIF);
-	//printf("wdt\n");
-	reset_motor_instructions(&CURRENT_SKID_COMMAND);
-}
+//ISR(WDT_vect) 
+//{
+	//WDTCSR |= (1<<WDIF);
+	//reset_motor_instructions(&CURRENT_SKID_COMMAND);
+//}
 
 

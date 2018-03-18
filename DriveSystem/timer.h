@@ -25,7 +25,7 @@
 #define T3_PRESCALE_8		0x00 | _BV(CS31)
 #define T3_PRESCALE_32		0x00 | _BV(CS31) | _BV(CS30)
 #define T3_PRESCALE_64		0x00 | _BV(CS32)
-#define T3_PRESCALE_128		0x00 | _BV(CS32) | _BV(CS10)
+#define T3_PRESCALE_128		0x00 | _BV(CS32) | _BV(CS30)
 #define T3_PRESCALE_256		0x00 | _BV(CS32) | _BV(CS31)
 #define T3_PRESCALE_1024	0x00 | _BV(CS32) | _BV(CS31) | _BV(CS30)
 

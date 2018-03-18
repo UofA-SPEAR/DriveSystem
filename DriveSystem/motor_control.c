@@ -5,6 +5,7 @@
  *  Author: spear
  */ 
 #include "motor_control.h"
+#include <stdio.h>
 
 void configure_motor_pins()
 {
@@ -24,31 +25,40 @@ void configure_motor_pins()
 
 void update_motor_controls(struct skid_steer* skid_steer_cmd)
 {
-	// Read current output levels
-	int current_right_level = SIGNED_LEVEL(RIGHT_PWM_LEVEL, RIGHT_DIR_PIN);
-	int current_left_level = SIGNED_LEVEL(LEFT_PWM_LEVEL, LEFT_DIR_PIN);
+	// Read current output levels (-255 to 255)
+	int current_right_level = SIGNED_LEVEL(RIGHT_PWM_LEVEL, READ_REG_BIT(RIGHT_DIR_REG, RIGHT_DIR_PIN));
+	int current_left_level = SIGNED_LEVEL(LEFT_PWM_LEVEL, READ_REG_BIT(LEFT_DIR_REG, LEFT_DIR_PIN));
 	
 	// Calculate deltas
 	int delta_right_level = SIGNED_LEVEL(skid_steer_cmd->right_pwm * THRUST_LEVEL, skid_steer_cmd->right_dir) - current_right_level;
 	int delta_left_level = SIGNED_LEVEL(skid_steer_cmd->left_pwm * THRUST_LEVEL, skid_steer_cmd->left_dir) - current_left_level;
+	printf("left curr: %i\n", current_left_level);
+	
+	printf("left targ: %i\n", (int) SIGNED_LEVEL(skid_steer_cmd->left_pwm * THRUST_LEVEL, skid_steer_cmd->left_dir));
+	
+	printf("left delta: %i\n", delta_left_level);
+	
 	
 	// Limit acceleration
 	delta_right_level = LIMIT_MAG(delta_right_level, MAX_DELTA);
 	delta_left_level = LIMIT_MAG(delta_left_level, MAX_DELTA);
 	
-	// Set the output pin levels
-	RIGHT_PWM_LEVEL = skid_steer_cmd-> right_pwm * THRUST_LEVEL;
-	LEFT_PWM_LEVEL = skid_steer_cmd-> left_pwm * THRUST_LEVEL;
-	// Set the direction pins
-	if(skid_steer_cmd->right_dir == 0)
-		RIGHT_DIR_REG &= ~(_BV(RIGHT_DIR_PIN));
-	else
-		RIGHT_DIR_REG |= _BV(RIGHT_DIR_PIN);
+	printf("left delta lim: %i\n", delta_left_level);
 	
-	if(skid_steer_cmd->left_dir == 0)
-		LEFT_DIR_REG &= ~(_BV(LEFT_DIR_PIN));
+	// Set the output pin levels
+	RIGHT_PWM_LEVEL = LIMIT_MAG(current_right_level + delta_right_level, MAX_THRUST_LEVEL);
+	LEFT_PWM_LEVEL = LIMIT_MAG(current_left_level + delta_left_level, MAX_THRUST_LEVEL);
+	printf("New Left: %i\n", SIGNED_LEVEL(LEFT_PWM_LEVEL, READ_REG_BIT(LEFT_DIR_REG, LEFT_DIR_PIN)));
+	
+	// Set the direction pins
+	if(skid_steer_cmd->right_dir == FORWARD_DIR)
+		RIGHT_DIR_REG |= _BV(RIGHT_DIR_PIN);
 	else
+		RIGHT_DIR_REG &= ~(_BV(RIGHT_DIR_PIN));
+	if(skid_steer_cmd->left_dir == FORWARD_DIR)
 		LEFT_DIR_REG |= _BV(LEFT_DIR_PIN);
+	else
+		LEFT_DIR_REG &= ~(_BV(LEFT_DIR_PIN));
 }
 
 void reset_motor_instructions(struct skid_steer* command)
@@ -73,11 +83,11 @@ struct skid_steer command_to_skid_steer(char* in_str)
 	char* left_str = strtok(in_str, " ");
 	float left_f = atof(left_str);
 	out_skid_steer.left_pwm = fabs(left_f);
-	out_skid_steer.left_dir = (left_f < 0) ? 0 : 1;
+	out_skid_steer.left_dir = (left_f < 0) ? BACKWARD_DIR : FORWARD_DIR;
 	char* right_str = strtok(NULL, " ");
 	float right_f = atof(right_str);
 	out_skid_steer.right_pwm = fabs(right_f);
-	out_skid_steer.right_dir = (right_f < 0) ? 0 : 1;
+	out_skid_steer.right_dir = (right_f < 0) ? BACKWARD_DIR : FORWARD_DIR;
 	return out_skid_steer;
 }
 

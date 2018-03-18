@@ -71,6 +71,8 @@
 #define RIGHT_PWM_LEVEL			OCR1A
 #define RIGHT_PWM_PIN			PORTB5
 
+#define READ_REG_BIT(REG, BITNUM) ((REG & ( 0x1 << BITNUM)) >> BITNUM)
+
 
 
 #endif /* HARDWARE_CONFIG_H_ */
