@@ -22,12 +22,24 @@ void configure_motor_pins()
 	RIGHT_DIR_REG |= _BV(RIGHT_DIR_PIN);
 }
 
-void set_motor_controls(struct skid_steer* skid_steer_cmd)
+void update_motor_controls(struct skid_steer* skid_steer_cmd)
 {
-	// Set the ouput pin levels
-	RIGHT_PWM_LEVEL = skid_steer_cmd-> right_pwm * MAX_THRUST_LEVEL;
-	LEFT_PWM_LEVEL = skid_steer_cmd-> left_pwm * MAX_THRUST_LEVEL;
-	// Set the direciton pins
+	// Read current output levels
+	int current_right_level = SIGNED_LEVEL(RIGHT_PWM_LEVEL, RIGHT_DIR_PIN);
+	int current_left_level = SIGNED_LEVEL(LEFT_PWM_LEVEL, LEFT_DIR_PIN);
+	
+	// Calculate deltas
+	int delta_right_level = SIGNED_LEVEL(skid_steer_cmd->right_pwm * THRUST_LEVEL, skid_steer_cmd->right_dir) - current_right_level;
+	int delta_left_level = SIGNED_LEVEL(skid_steer_cmd->left_pwm * THRUST_LEVEL, skid_steer_cmd->left_dir) - current_left_level;
+	
+	// Limit acceleration
+	delta_right_level = LIMIT_MAG(delta_right_level, MAX_DELTA);
+	delta_left_level = LIMIT_MAG(delta_left_level, MAX_DELTA);
+	
+	// Set the output pin levels
+	RIGHT_PWM_LEVEL = skid_steer_cmd-> right_pwm * THRUST_LEVEL;
+	LEFT_PWM_LEVEL = skid_steer_cmd-> left_pwm * THRUST_LEVEL;
+	// Set the direction pins
 	if(skid_steer_cmd->right_dir == 0)
 		RIGHT_DIR_REG &= ~(_BV(RIGHT_DIR_PIN));
 	else
@@ -37,15 +49,14 @@ void set_motor_controls(struct skid_steer* skid_steer_cmd)
 		LEFT_DIR_REG &= ~(_BV(LEFT_DIR_PIN));
 	else
 		LEFT_DIR_REG |= _BV(LEFT_DIR_PIN);
-	
 }
 
 void reset_motor_instructions(struct skid_steer* command)
 {
 	command->left_pwm = 0.0;
-	command->left_dir = 1;
+	command->left_dir = FORWARD_DIR;
 	command->right_pwm = 0.0;
-	command->right_dir = 1;
+	command->right_dir = FORWARD_DIR;
 }
 
 void command_to_polar(char* in_str, struct polar_coordinate* out_polar_coord)
@@ -56,16 +67,18 @@ void command_to_polar(char* in_str, struct polar_coordinate* out_polar_coord)
 	out_polar_coord->dir = atof(dir_str);
 }
 
-void command_to_skid_steer(char* in_str, struct skid_steer* out_skid_steer)
+struct skid_steer command_to_skid_steer(char* in_str)
 {
+	struct skid_steer out_skid_steer;
 	char* left_str = strtok(in_str, " ");
 	float left_f = atof(left_str);
-	out_skid_steer->left_pwm = fabs(left_f);
-	out_skid_steer->left_dir = (left_f < 0) ? 0 : 1;
+	out_skid_steer.left_pwm = fabs(left_f);
+	out_skid_steer.left_dir = (left_f < 0) ? 0 : 1;
 	char* right_str = strtok(NULL, " ");
 	float right_f = atof(right_str);
-	out_skid_steer->right_pwm = fabs(right_f);
-	out_skid_steer->right_dir = (right_f < 0) ? 0 : 1;
+	out_skid_steer.right_pwm = fabs(right_f);
+	out_skid_steer.right_dir = (right_f < 0) ? 0 : 1;
+	return out_skid_steer;
 }
 
 //struct drive_motors skid_steer_output(struct skid_steer command)

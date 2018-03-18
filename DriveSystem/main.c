@@ -10,6 +10,13 @@
 #include "motor_control.h"
 #include "timer.h"
 
+#ifndef F_CPU
+#define F_CPU 16000000UL
+#endif
+
+#ifndef BAUD
+#define BAUD 9600
+#endif
 
 #define BUF_SIZE 32
 
@@ -21,6 +28,8 @@ struct skid_steer CURRENT_SKID_COMMAND;
 
 int main (void) 
 {
+	fflush(stdout);
+	printf("Start\n");
 	// disable watchdog during initialization
 	//wdt_disable();
 	// Initialize
@@ -49,7 +58,8 @@ int main (void)
 		LOOP_RUN_FLAG = 0;
 		
 		// CURRENT_SKID_COMMAND is set, do something
-		set_motor_controls(&CURRENT_SKID_COMMAND);
+		update_motor_controls(&CURRENT_SKID_COMMAND);
+		printf("Target: %i, Actual: %i\n", (int) SIGNED_LEVEL(CURRENT_SKID_COMMAND.left_pwm, CURRENT_SKID_COMMAND.left_dir), (int) SIGNED_LEVEL(LEFT_PWM_LEVEL, LEFT_PWM_LEVEL));
 	}
 }
 
@@ -58,6 +68,7 @@ int main (void)
 // Incoming message interrupt
 ISR(USART0_RX_vect)
 {
+	printf("USART ISR\n");
 	char receivedByte = USART0_RX_BUF; // Fetch incoming byte
 	USART0_TX_BUF = receivedByte; // Echo directly back
 	if(receivedByte != '\n')
@@ -66,7 +77,7 @@ ISR(USART0_RX_vect)
 	}
 	else
 	{
-		command_to_skid_steer(INPUT_COMMAND_STRING, &CURRENT_SKID_COMMAND);
+		CURRENT_SKID_COMMAND = command_to_skid_steer(INPUT_COMMAND_STRING); // Get the value of the new command
 		memset(INPUT_COMMAND_STRING, 0, sizeof(INPUT_COMMAND_STRING)); // reset INPUT_COMMAND_STRING
 		wdt_reset(); // reset the watchdog
 	}

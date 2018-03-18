@@ -14,7 +14,18 @@
 #include <stdlib.h>
 #include "hardware_config.h"
 
-#define MAX_THRUST_LEVEL 128
+#define MAX_THRUST_LEVEL 255
+#define THRUST_LEVEL 128
+#define TRUST_FRAC THRUST_LEVEL / MAX_THRUST_LEVEL
+#define MAX_DELTA THRUST_LEVEL / 255
+#define FORWARD_DIR 1
+#define BACKWARD_DIR 0
+
+#define DIR_SIGN(DIR) (DIR == FORWARD_DIR ? 1 : -1)
+#define SIGN_OF(VAL) (VAL > 0 ? 1 : -1)
+#define SIGNED_LEVEL(MAG, DIR_BIT) (MAG * DIR_SIGN(DIR_BIT))
+#define LIMIT_MAG(VAL, LIMIT) ((abs(VAL) < LIMIT ? abs(VAL) : LIMIT) * SIGN_OF(VAL))
+
 
 struct drive_motor
 {
@@ -46,10 +57,10 @@ struct skid_steer
 };
 
 void configure_motor_pins();
-void set_motor_controls(struct skid_steer* skid_steer_cmd);
+void update_motor_controls(struct skid_steer* skid_steer_cmd);
 void reset_motor_instructions(struct skid_steer* command);
 void command_to_polar(char* in_str, struct polar_coordinate* out_polar_coord);
-void command_to_skid_steer(char* in_str, struct skid_steer* out_skid_steer);
+struct skid_steer command_to_skid_steer(char* in_str);
 //struct drive_motors skid_steer_output(struct skid_steer command)
 
 
