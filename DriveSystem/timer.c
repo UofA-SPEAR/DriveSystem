@@ -10,7 +10,7 @@ void setup_timer()
 {
 	TCCR3B |= _BV(WGM32); // configure timer3 for CTC mode
 	TIMSK3 |= _BV(OCIE3A); // enable the CTC interrupt b
-	TCCR3B |= T3_PRESCALE_128;
+	TCCR3B |= T3_PRESCALE_0;
 	OCR3A = COUNTER_MAX_16;
 	
 	TCCR1A |= _BV(COM1A1) | _BV(COM1B1); // set none-inverting mode

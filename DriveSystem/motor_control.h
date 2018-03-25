@@ -62,8 +62,6 @@ void update_motor_controls(struct skid_steer* skid_steer_cmd);
 void reset_motor_instructions(struct skid_steer* command);
 void command_to_polar(char* in_str, struct polar_coordinate* out_polar_coord);
 struct skid_steer command_to_skid_steer(char* in_str);
-//struct drive_motors skid_steer_output(struct skid_steer command)
-
 
 
 #endif /* MOTOR_CONTROL_H_ */

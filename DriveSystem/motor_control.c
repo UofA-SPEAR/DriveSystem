@@ -32,18 +32,10 @@ void update_motor_controls(struct skid_steer* skid_steer_cmd)
 	// Calculate deltas
 	int delta_right_level = SIGNED_LEVEL(skid_steer_cmd->right_pwm * THRUST_LEVEL, skid_steer_cmd->right_dir) - current_right_level;
 	int delta_left_level = SIGNED_LEVEL(skid_steer_cmd->left_pwm * THRUST_LEVEL, skid_steer_cmd->left_dir) - current_left_level;
-	printf("left curr: %i\n", current_left_level);
-	
-	printf("left targ: %i\n", (int) SIGNED_LEVEL(skid_steer_cmd->left_pwm * THRUST_LEVEL, skid_steer_cmd->left_dir));
-	
-	printf("left delta: %i\n", delta_left_level);
-	
-	
+		
 	// Limit acceleration
 	delta_right_level = LIMIT_MAG(delta_right_level, MAX_DELTA);
 	delta_left_level = LIMIT_MAG(delta_left_level, MAX_DELTA);
-	
-	printf("left delta lim: %i\n", delta_left_level);
 	
 	// Set the output pin levels
 	int new_right_value = LIMIT_MAG(current_right_level + delta_right_level, MAX_THRUST_LEVEL);
@@ -51,9 +43,6 @@ void update_motor_controls(struct skid_steer* skid_steer_cmd)
 	
 	RIGHT_PWM_LEVEL = abs(new_right_value);
 	LEFT_PWM_LEVEL = abs(new_left_value);
-	printf("New Left: %i\n", SIGNED_LEVEL(LEFT_PWM_LEVEL, READ_REG_BIT(LEFT_DIR_REG, LEFT_DIR_PIN)));
-	
-	
 	
 	// TODO: Problem is here
 	// Set the direction pins
@@ -96,17 +85,3 @@ struct skid_steer command_to_skid_steer(char* in_str)
 	out_skid_steer.right_dir = (right_f < 0) ? BACKWARD_DIR : FORWARD_DIR;
 	return out_skid_steer;
 }
-
-//struct drive_motors skid_steer_output(struct skid_steer command)
-//{
-//struct drive_motors output_levels;
-//int8_t left_point = command.left;
-//int8_t right_point = command.right;
-//output_levels.front_left.operating_level = left_point;
-//output_levels.front_left.operating_level = left_point;
-//output_levels.front_left.operating_level = left_point;
-//output_levels.front_right.operating_level = right_point;
-//output_levels.front_right.operating_level = right_point;
-//output_levels.front_right.operating_level = right_point;
-//return output_levels;
-//}

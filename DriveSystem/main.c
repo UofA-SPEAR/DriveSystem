@@ -57,12 +57,9 @@ int main (void)
 	{
 		while(LOOP_RUN_FLAG == 0);
 		LOOP_RUN_FLAG = 0;
-		
-		printf("\nCurrent command: mag:%i, dir:%i\n", (int) (100* CURRENT_SKID_COMMAND.right_pwm), (int) CURRENT_SKID_COMMAND.right_dir);
-		
+			
 		// CURRENT_SKID_COMMAND is set, do something
 		update_motor_controls(&CURRENT_SKID_COMMAND);
-		printf("Target: %i, Actual: %i\n", (int)  SIGNED_LEVEL(CURRENT_SKID_COMMAND.left_pwm * THRUST_LEVEL , CURRENT_SKID_COMMAND.left_dir), (int) SIGNED_LEVEL(LEFT_PWM_LEVEL, READ_REG_BIT(LEFT_DIR_REG, LEFT_DIR_PIN) ));
 	}
 }
 
@@ -80,9 +77,7 @@ ISR(USART0_RX_vect)
 	}
 	else
 	{
-		printf("Incoming command string: %s\n", INPUT_COMMAND_STRING);
 		CURRENT_SKID_COMMAND = command_to_skid_steer(INPUT_COMMAND_STRING); // Get the value of the new command
-		printf("Current command in isr: mag:%i, dir:%i\n", (int) (100* CURRENT_SKID_COMMAND.right_pwm), (int) CURRENT_SKID_COMMAND.right_dir);
 		memset(INPUT_COMMAND_STRING, 0, sizeof(INPUT_COMMAND_STRING)); // reset INPUT_COMMAND_STRING
 		//wdt_reset(); // reset the watchdog
 	}
