@@ -46,19 +46,25 @@ void update_motor_controls(struct skid_steer* skid_steer_cmd)
 	printf("left delta lim: %i\n", delta_left_level);
 	
 	// Set the output pin levels
-	RIGHT_PWM_LEVEL = LIMIT_MAG(current_right_level + delta_right_level, MAX_THRUST_LEVEL);
-	LEFT_PWM_LEVEL = LIMIT_MAG(current_left_level + delta_left_level, MAX_THRUST_LEVEL);
+	int new_right_value = LIMIT_MAG(current_right_level + delta_right_level, MAX_THRUST_LEVEL);
+	int new_left_value = LIMIT_MAG(current_left_level + delta_left_level, MAX_THRUST_LEVEL);
+	
+	RIGHT_PWM_LEVEL = abs(new_right_value);
+	LEFT_PWM_LEVEL = abs(new_left_value);
 	printf("New Left: %i\n", SIGNED_LEVEL(LEFT_PWM_LEVEL, READ_REG_BIT(LEFT_DIR_REG, LEFT_DIR_PIN)));
 	
+	
+	
+	// TODO: Problem is here
 	// Set the direction pins
-	if(skid_steer_cmd->right_dir == FORWARD_DIR)
-		RIGHT_DIR_REG |= _BV(RIGHT_DIR_PIN);
+	if(DIR_SIGN(new_right_value) == FORWARD_DIR)
+		RIGHT_DIR_REG |= _BV(RIGHT_DIR_PIN); // set
 	else
-		RIGHT_DIR_REG &= ~(_BV(RIGHT_DIR_PIN));
-	if(skid_steer_cmd->left_dir == FORWARD_DIR)
-		LEFT_DIR_REG |= _BV(LEFT_DIR_PIN);
+		RIGHT_DIR_REG &= ~(_BV(RIGHT_DIR_PIN)); // clr
+	if(DIR_SIGN(new_left_value) == FORWARD_DIR)
+		LEFT_DIR_REG |= _BV(LEFT_DIR_PIN); // set
 	else
-		LEFT_DIR_REG &= ~(_BV(LEFT_DIR_PIN));
+		LEFT_DIR_REG &= ~(_BV(LEFT_DIR_PIN)); // clr
 }
 
 void reset_motor_instructions(struct skid_steer* command)
