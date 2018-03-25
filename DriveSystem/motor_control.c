@@ -57,11 +57,11 @@ void update_motor_controls(struct skid_steer* skid_steer_cmd)
 	
 	// TODO: Problem is here
 	// Set the direction pins
-	if(DIR_SIGN(new_right_value) == FORWARD_DIR)
+	if(SIGN_DIR(new_right_value) == FORWARD_DIR)
 		RIGHT_DIR_REG |= _BV(RIGHT_DIR_PIN); // set
 	else
 		RIGHT_DIR_REG &= ~(_BV(RIGHT_DIR_PIN)); // clr
-	if(DIR_SIGN(new_left_value) == FORWARD_DIR)
+	if(SIGN_DIR(new_left_value) == FORWARD_DIR)
 		LEFT_DIR_REG |= _BV(LEFT_DIR_PIN); // set
 	else
 		LEFT_DIR_REG &= ~(_BV(LEFT_DIR_PIN)); // clr
